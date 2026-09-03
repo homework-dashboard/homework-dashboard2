@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>Расписание и задания | Музыкальная школа № 1 им. Н. Г. Сабитова</title>
+    <meta property="og:image" content="https://homework-dashboard.github.io/homework-dashboard/og-image-new.png">
+    <meta property="og:image:width" content="640">
+    <meta property="og:image:height" content="351">
+    <meta property="og:title" content="Расписание и задания | Музыкальная школа № 1 им. Н. Г. Сабитова">
+    <meta property="og:description" content="Расписание занятий и домашние задания музыкальной школы">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://homework-dashboard.github.io/homework-dashboard/og-image-new.png">
+    <meta name="twitter:title" content="Расписание и задания | Музыкальная школа № 1 им. Н. Г. Сабитова">
+    <meta name="twitter:description" content="Расписание занятий и домашние задания музыкальной школы">
+    <script>
+      // Set <base> at runtime so one build works on both bolt.host (served at /)
+      // and GitHub Pages (served at /homework-dashboard/).
+      (function() {
+        var path = window.location.pathname;
+        var base;
+        if (path.indexOf('/homework-dashboard/') === 0 || path === '/homework-dashboard') {
+          base = '/homework-dashboard/';
+        } else {
+          base = '/';
+        }
+        var el = document.createElement('base');
+        el.href = base;
+        document.head.appendChild(el);
+      })();
+    </script>
+</head>
+  <body>
+    <script>
+      (function() {
+        var stored = localStorage.getItem('theme');
+        if (!stored || stored === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

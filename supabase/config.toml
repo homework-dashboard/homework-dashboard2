@@ -1,0 +1,5 @@
+[functions.admin-reset-password]
+verify_jwt = true
+
+[functions.delete-user-account]
+verify_jwt = true
