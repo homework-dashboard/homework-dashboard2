@@ -193,8 +193,9 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       result.push(lines.join('\n'));
       return result;
     }, []);
+    const nl = '\r\n';
     const text = sections.length > 0
-      ? `${formatDate(row.due_date)}\n\n${sections.join('\n\n')}`
+      ? [formatDate(row.due_date), '', ...sections.flatMap((s, i) => i > 0 ? ['', s] : [s])].join(nl)
       : formatDate(row.due_date);
 
     try {
@@ -307,7 +308,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
             style={gridStyle}
           >
             <div className="flex items-center gap-1.5 px-3 py-3 text-xs font-semibold uppercase tracking-wider text-amber-800 sm:px-4 dark:text-amber-400">
-              <CalendarDays size={14} /> <span className="hidden sm:inline">Дата</span>
+              <CalendarDays size={14} className="shrink-0" /> <span className="hidden sm:inline">Дата</span>
             </div>
             {subjects.map((s) => (
               <div key={s.id} className="border-l border-amber-200 px-2 py-2 sm:px-3 dark:border-amber-800">
@@ -405,7 +406,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                       </div>
                     ) : (
                       <div className="flex h-full flex-col gap-2">
-                        <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
+                        <p className="whitespace-pre-wrap break-words text-sm text-slate-700 dark:text-slate-300">
                           {ent.content || <span className="text-stone-300 dark:text-slate-600">—</span>}
                         </p>
                         {ent.link_url && (
@@ -413,9 +414,9 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                             href={ent.link_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
+                            className="mt-auto inline-flex w-fit max-w-full items-center gap-1.5 break-all rounded-lg bg-amber-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 sm:px-3"
                           >
-                            <ExternalLink size={13} /> Открыть материал
+                            <ExternalLink size={13} className="shrink-0" /> <span>Открыть материал</span>
                           </a>
                         )}
                       </div>
