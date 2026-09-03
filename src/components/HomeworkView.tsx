@@ -193,16 +193,39 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       result.push(lines.join('\n'));
       return result;
     }, []);
-    const nl = '\r\n';
-    const text = sections.length > 0
-      ? [formatDate(row.due_date), '', ...sections.flatMap((s, i) => i > 0 ? ['', s] : [s])].join(nl)
-      : formatDate(row.due_date);
 
+    const parts: string[] = [formatDate(row.due_date), ''];
+    for (let i = 0; i < sections.length; i++) {
+      if (i > 0) parts.push('');
+      parts.push(sections[i]);
+    }
+    const text = parts.join('\n');
+
+    let copied = false;
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedRowId(row.id);
-      window.setTimeout(() => setCopiedRowId((current) => (current === row.id ? null : current)), 1800);
+      copied = true;
     } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        copied = true;
+      } catch {
+        // ignore
+      }
+      document.body.removeChild(ta);
+    }
+
+    if (copied) {
+      setCopiedRowId(row.id);
+      window.setTimeout(() => setCopiedRowId((cur) => (cur === row.id ? null : cur)), 1800);
+    } else {
       setError('Не удалось скопировать задание');
     }
   };
