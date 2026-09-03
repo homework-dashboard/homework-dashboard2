@@ -255,7 +255,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
     : '…';
 
   const colCount = subjects.length;
-  const dateColW = 'minmax(90px, 110px)';
+  const dateColW = 'minmax(150px, 170px)';
   const subjColW = 'minmax(140px, 1fr)';
   const actionColW = '40px';
 
@@ -413,7 +413,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                             rel="noopener noreferrer"
                             className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
                           >
-                            <ExternalLink size={13} /> Открыть задание
+                            <ExternalLink size={13} /> Открыть материал
                           </a>
                         )}
                       </div>
