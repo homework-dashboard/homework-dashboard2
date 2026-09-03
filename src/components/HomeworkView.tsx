@@ -437,9 +437,9 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                             href={ent.link_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-auto inline-flex w-fit max-w-full items-center gap-1.5 break-all rounded-lg bg-amber-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 sm:px-3"
+                            className="mt-auto flex w-full max-w-full min-w-0 items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-2.5 py-1.5 text-center text-xs font-semibold leading-tight text-white transition-colors hover:bg-amber-700 sm:px-3"
                           >
-                            <ExternalLink size={13} className="shrink-0" /> <span className="whitespace-nowrap">Открыть материал</span>
+                            <ExternalLink size={13} className="shrink-0" /> <span className="min-w-0 whitespace-normal break-normal">Открыть материал</span>
                           </a>
                         )}
                       </div>
