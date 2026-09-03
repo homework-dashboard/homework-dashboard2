@@ -193,7 +193,9 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       result.push(lines.join('\n'));
       return result;
     }, []);
-    const text = [formatDate(row.due_date), ...sections].join('\n\n');
+    const text = sections.length > 0
+      ? `${formatDate(row.due_date)}\n\n${sections.join('\n\n')}`
+      : formatDate(row.due_date);
 
     try {
       await navigator.clipboard.writeText(text);
