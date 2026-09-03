@@ -30,6 +30,10 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function sortHomeworkRows(rows: Homework[]) {
+  return [...rows].sort((a, b) => b.due_date.localeCompare(a.due_date));
+}
+
 export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmin, myProfile }: Props) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [teacherId, setTeacherId] = useState<string | null>(null);
@@ -75,7 +79,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
           .from('homework')
           .select('*')
           .eq('lesson_id', lessonData.id)
-          .order('due_date', { ascending: true })
+          .order('due_date', { ascending: false })
           .order('created_at', { ascending: false }),
         supabase
           .from('homework_subjects')
@@ -92,7 +96,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       else if (subjRes.error) setError(subjRes.error.message);
       else if (entRes.error) setError(entRes.error.message);
       else {
-        setRows(hwRes.data ?? []);
+        setRows(sortHomeworkRows(hwRes.data ?? []));
         setSubjects(subjRes.data ?? []);
         const entMap: Record<string, Record<string, { content: string; link_url: string }>> = {};
         for (const e of entRes.data ?? []) {
@@ -153,13 +157,15 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       return;
     }
     if (data) {
-      setRows((prev) => [...prev, data]);
+      setRows((prev) => sortHomeworkRows([data, ...prev]));
       setEntries((prev) => ({ ...prev, [data.id]: {} }));
     }
   };
 
   const patchDate = async (r: Homework, due_date: string) => {
-    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, due_date } : x)));
+    setRows((prev) =>
+      sortHomeworkRows(prev.map((x) => (x.id === r.id ? { ...x, due_date } : x))),
+    );
     await supabase.from('homework').update({ due_date }).eq('id', r.id);
   };
 
