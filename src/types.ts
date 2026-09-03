@@ -63,5 +63,6 @@ export type HomeworkEntry = {
   homework_id: string;
   subject_id: string;
   content: string;
+  link_url: string | null;
   created_at: string;
 };

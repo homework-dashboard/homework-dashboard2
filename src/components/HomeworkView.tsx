@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, CalendarDays, Lock, X } from 'lucide-react';
+import { Plus, Trash2, CalendarDays, Lock, X, Link2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Lesson, Homework, HomeworkSubject, HomeworkEntry } from '@/types';
 import { weekdayName, formatTime } from '@/types';
@@ -35,7 +35,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [rows, setRows] = useState<Homework[]>([]);
   const [subjects, setSubjects] = useState<HomeworkSubject[]>([]);
-  const [entries, setEntries] = useState<Record<string, Record<string, string>>>({});
+  const [entries, setEntries] = useState<Record<string, Record<string, { content: string; link_url: string }>>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -84,7 +84,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
           .order('created_at', { ascending: true }),
         supabase
           .from('homework_entries')
-          .select('homework_id, subject_id, content'),
+          .select('homework_id, subject_id, content, link_url'),
       ]);
 
       if (hwRes.error) setError(hwRes.error.message);
@@ -93,10 +93,10 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       else {
         setRows(hwRes.data ?? []);
         setSubjects(subjRes.data ?? []);
-        const entMap: Record<string, Record<string, string>> = {};
+        const entMap: Record<string, Record<string, { content: string; link_url: string }>> = {};
         for (const e of entRes.data ?? []) {
           if (!entMap[e.homework_id]) entMap[e.homework_id] = {};
-          entMap[e.homework_id][e.subject_id] = e.content;
+          entMap[e.homework_id][e.subject_id] = { content: e.content, link_url: e.link_url ?? '' };
         }
         setEntries(entMap);
       }
@@ -162,11 +162,14 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
     await supabase.from('homework').update({ due_date }).eq('id', r.id);
   };
 
-  const patchEntry = async (hwId: string, subjId: string, content: string) => {
-    setEntries((prev) => ({
-      ...prev,
-      [hwId]: { ...(prev[hwId] ?? {}), [subjId]: content },
-    }));
+  const upsertEntry = async (hwId: string, subjId: string, patch: { content?: string; link_url?: string }) => {
+    setEntries((prev) => {
+      const cur = prev[hwId]?.[subjId] ?? { content: '', link_url: '' };
+      return {
+        ...prev,
+        [hwId]: { ...(prev[hwId] ?? {}), [subjId]: { ...cur, ...patch } },
+      };
+    });
     const { data: existing } = await supabase
       .from('homework_entries')
       .select('id')
@@ -174,9 +177,9 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       .eq('subject_id', subjId)
       .maybeSingle();
     if (existing) {
-      await supabase.from('homework_entries').update({ content }).eq('id', existing.id);
+      await supabase.from('homework_entries').update(patch).eq('id', existing.id);
     } else {
-      await supabase.from('homework_entries').insert({ homework_id: hwId, subject_id: subjId, content });
+      await supabase.from('homework_entries').insert({ homework_id: hwId, subject_id: subjId, content: patch.content ?? '', link_url: patch.link_url ?? null });
     }
   };
 
@@ -337,26 +340,56 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                   )}
                 </div>
 
-                {subjects.map((s) => (
+                {subjects.map((s) => {
+                  const ent = entries[r.id]?.[s.id] ?? { content: '', link_url: '' };
+                  return (
                   <div key={s.id} className="border-l border-stone-100 px-3 py-3 sm:px-4 dark:border-slate-700">
                     {editable ? (
-                      <textarea
-                        defaultValue={entries[r.id]?.[s.id] ?? ''}
-                        rows={2}
-                        placeholder="Задание"
-                        onBlur={(e) => {
-                          const v = e.target.value;
-                          if (v !== (entries[r.id]?.[s.id] ?? '')) patchEntry(r.id, s.id, v);
-                        }}
-                        className="w-full resize-y rounded-lg border border-stone-300 px-2 py-2 text-sm text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-                      />
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          defaultValue={ent.content}
+                          rows={2}
+                          placeholder="Задание"
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            if (v !== ent.content) upsertEntry(r.id, s.id, { content: v });
+                          }}
+                          className="w-full resize-y rounded-lg border border-stone-300 px-2 py-2 text-sm text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                        />
+                        <div className="flex items-center gap-1.5">
+                          <Link2 size={14} className="shrink-0 text-slate-400 dark:text-slate-500" />
+                          <input
+                            type="url"
+                            defaultValue={ent.link_url}
+                            placeholder="Ссылка на файл или папку"
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== ent.link_url) upsertEntry(r.id, s.id, { link_url: v });
+                            }}
+                            className="min-w-0 flex-1 rounded-lg border border-stone-300 px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+                          />
+                        </div>
+                      </div>
                     ) : (
-                      <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
-                        {entries[r.id]?.[s.id] || <span className="text-stone-300 dark:text-slate-600">—</span>}
-                      </p>
+                      <div className="flex flex-col gap-2">
+                        <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
+                          {ent.content || <span className="text-stone-300 dark:text-slate-600">—</span>}
+                        </p>
+                        {ent.link_url && (
+                          <a
+                            href={ent.link_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
+                          >
+                            <ExternalLink size={13} /> Открыть задание
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
 
                 {editable && (
                   <div className="flex items-center justify-center border-l border-stone-100 px-1 dark:border-slate-700">
