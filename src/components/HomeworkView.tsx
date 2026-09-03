@@ -466,22 +466,25 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
           {/* Add subject row (editable only) */}
           {editable && (
             <div
-              className="flex items-center gap-2 border-t border-stone-100 bg-stone-50 px-3 py-3 sm:px-4 dark:border-slate-700 dark:bg-slate-700/50"
+              className="border-t border-stone-100 bg-stone-50 px-3 py-3 sm:px-4 dark:border-slate-700 dark:bg-slate-700/50"
+              style={gridStyle}
             >
-              <input
-                value={newSubjectName}
-                onChange={(e) => setNewSubjectName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addSubject()}
-                placeholder="Новый предмет"
-                className="min-w-0 flex-1 rounded-lg border border-stone-300 px-2 py-2 text-sm text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-              />
-              <button
-                onClick={addSubject}
-                disabled={!newSubjectName.trim() || saving}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-40"
-              >
-                <Plus size={15} /> Добавить предмет
-              </button>
+              <div className="flex items-center gap-2" style={{ gridColumn: '1 / -1' }}>
+                <input
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addSubject()}
+                  placeholder="Новый предмет"
+                  className="min-w-0 flex-1 rounded-lg border border-stone-300 px-2 py-2 text-sm text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                />
+                <button
+                  onClick={addSubject}
+                  disabled={!newSubjectName.trim() || saving}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-40"
+                >
+                  <Plus size={15} /> Добавить предмет
+                </button>
+              </div>
             </div>
           )}
         </div>
