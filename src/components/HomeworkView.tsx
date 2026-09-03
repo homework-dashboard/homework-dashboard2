@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, CalendarDays, Lock, X, Link2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, CalendarDays, Lock, X, Link2, ExternalLink, Copy, Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Lesson, Homework, HomeworkSubject, HomeworkEntry } from '@/types';
+import type { Lesson, Homework, HomeworkSubject } from '@/types';
 import { weekdayName, formatTime } from '@/types';
 import StateBlock from '@/components/StateBlock';
 
@@ -41,6 +41,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
   const [saving, setSaving] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
+  const [copiedRowId, setCopiedRowId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -180,6 +181,26 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       await supabase.from('homework_entries').update(patch).eq('id', existing.id);
     } else {
       await supabase.from('homework_entries').insert({ homework_id: hwId, subject_id: subjId, content: patch.content ?? '', link_url: patch.link_url ?? null });
+    }
+  };
+
+  const copyRow = async (row: Homework) => {
+    const sections = subjects.reduce<string[]>((result, subject) => {
+      const entry = entries[row.id]?.[subject.id] ?? { content: '', link_url: '' };
+      if (!entry.content.trim() && !entry.link_url.trim()) return result;
+      const lines = [`${subject.name || 'Без названия'}: ${entry.content.trim()}`];
+      if (entry.link_url.trim()) lines.push(entry.link_url.trim());
+      result.push(lines.join('\n'));
+      return result;
+    }, []);
+    const text = [formatDate(row.due_date), ...sections].join('\n\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedRowId(row.id);
+      window.setTimeout(() => setCopiedRowId((current) => (current === row.id ? null : current)), 1800);
+    } catch {
+      setError('Не удалось скопировать задание');
     }
   };
 
@@ -334,9 +355,19 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                       className="w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                     />
                   ) : (
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      {formatDate(r.due_date)}
-                    </span>
+                    <div className="flex h-full flex-col items-start gap-3">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        {formatDate(r.due_date)}
+                      </span>
+                      <button
+                        onClick={() => copyRow(r)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30"
+                        title="Скопировать всё задание на эту дату"
+                      >
+                        {copiedRowId === r.id ? <Check size={13} /> : <Copy size={13} />}
+                        {copiedRowId === r.id ? 'Скопировано' : 'Копировать'}
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -371,7 +402,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex h-full flex-col gap-2">
                         <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
                           {ent.content || <span className="text-stone-300 dark:text-slate-600">—</span>}
                         </p>
@@ -380,7 +411,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
                             href={ent.link_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
+                            className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
                           >
                             <ExternalLink size={13} /> Открыть задание
                           </a>
