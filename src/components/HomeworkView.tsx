@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Trash2, CalendarDays, Lock, X, Link2, ExternalLink, Copy, Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Lesson, Homework, HomeworkSubject } from '@/types';
@@ -42,7 +42,6 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
   const [canEdit, setCanEdit] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [copiedRowId, setCopiedRowId] = useState<string | null>(null);
-  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -114,10 +113,6 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       }
     })();
   }, [lessonSlug, teacherSlug, myProfile, isAdmin]);
-
-  useLayoutEffect(() => {
-    if (tableScrollRef.current) tableScrollRef.current.scrollLeft = 0;
-  }, [lessonSlug, subjects.length]);
 
   const editable = editMode && canEdit;
 
@@ -329,13 +324,13 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
       ) : rows.length === 0 && !editable ? (
         <StateBlock empty emptyText="Задания пока не добавлены" />
       ) : (
-        <div ref={tableScrollRef} className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
           {/* Header row */}
           <div
-            className="flex w-full min-w-max items-stretch border-b-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
+            className="flex items-stretch border-b-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
             style={gridStyle}
           >
-            <div className="flex items-center gap-1.5 border-r border-amber-200 px-3 py-3 text-xs font-semibold uppercase tracking-wider text-amber-800 sm:px-4 dark:border-amber-800 dark:text-amber-400">
+            <div className="flex items-center gap-1.5 px-3 py-3 text-xs font-semibold uppercase tracking-wider text-amber-800 sm:px-4 dark:text-amber-400">
               <CalendarDays size={14} className="shrink-0" /> <span className="hidden sm:inline">Дата</span>
             </div>
             {subjects.map((s) => (
@@ -374,10 +369,10 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
             {rows.map((r) => (
               <div
                 key={r.id}
-                className="flex w-full min-w-max items-stretch"
+                className="flex items-stretch"
                 style={gridStyle}
               >
-                <div className="flex items-center border-r border-stone-100 px-3 py-3 sm:px-4 dark:border-slate-700">
+                <div className="flex items-center px-3 py-3 sm:px-4">
                   {editable ? (
                     <input
                       type="date"
