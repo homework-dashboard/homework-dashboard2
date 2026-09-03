@@ -327,7 +327,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
         <div className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
           {/* Header row */}
           <div
-            className="flex items-stretch border-b-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
+            className="flex w-max min-w-full items-stretch border-b-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
             style={gridStyle}
           >
             <div className="flex items-center gap-1.5 px-3 py-3 text-xs font-semibold uppercase tracking-wider text-amber-800 sm:px-4 dark:text-amber-400">
@@ -369,7 +369,7 @@ export default function HomeworkView({ lessonSlug, teacherSlug, editMode, isAdmi
             {rows.map((r) => (
               <div
                 key={r.id}
-                className="flex items-stretch"
+                className="flex w-max min-w-full items-stretch"
                 style={gridStyle}
               >
                 <div className="flex items-center px-3 py-3 sm:px-4">
